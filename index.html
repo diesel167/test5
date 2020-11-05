@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Domain.one</title>
+</head>
+<body>
+    <iframe src="https://www.domain.two"></iframe>
+    <script>
+        window.onload = () =>{
+          function arg(){
+            console.log('abcd');
+          }
+          let encode = encodeURI(arg.toString());
+          eval('('+decodeURI(encode)+')();');
+          const frame = document.querySelector('iframe').contentWindow;
+          const domains = [
+            "https://www.domain.two"
+          ];
+          window.addEventListener("message", messageHandler, false);
+          function messageHandler(event) {
+            if (!domains.includes(event.origin))
+              return;
+            const { action, key, value, callback } = event.data;
+            if (action === 'read'){
+              console.log(`${key}:${value}`);
+              if(callback){
+                eval('('+decodeURI(callback)+')();'); //decode it to run
+              }
+            }
+            else if (action === 'written') {
+              console.log('written');
+              if(callback){
+                eval('('+decodeURI(callback)+')();'); //decode it to run
+              }
+            }
+            else if(action === 'deleted') {
+              console.log('deleted');
+              if(callback){
+                eval('('+decodeURI(callback)+')();'); //decode it to run
+              }
+            }
+          }
+          frame.postMessage({
+                action:'write',
+                key: 'storage',
+                value: 'someobj'},
+              '*'
+          );
+          frame.postMessage({
+                action:'read',
+                key: 'storage'},
+              "*"
+          );
+          frame.postMessage({
+                action:'delete',
+                key: 'storage',
+                value: 'someobj'},
+              "*"
+          );
+        }
+    </script>
+</body>
+</html>

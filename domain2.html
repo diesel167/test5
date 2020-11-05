@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Domain.two</title>
+</head>
+<body>
+<script>
+    window.onload = () =>{
+      const domains = [
+        "https://www.domain.one"
+      ];
+
+      //simple callback for example
+      let callback = () =>{
+        console.log('I am callback from domain two');
+      };
+
+      window.addEventListener("message", messageHandler, false);
+      function messageHandler(event) {
+        if (!domains.includes(event.origin)){
+          return;
+        }
+        const { action, key, value } = event.data;
+        if (action === 'read'){
+          event.source.postMessage({
+            action: 'read',
+            key: key,
+            value: JSON.parse(window.localStorage.getItem(key)),
+            callback: encodeURI(callback.toString())  //encode it to send
+          }, '*')
+        }
+
+        else if (action === 'write') {
+          window.localStorage.setItem(key, JSON.stringify(value));
+          event.source.postMessage({
+            action: 'written',
+            callback: encodeURI(callback.toString()) //encode it to send
+          }, '*')
+        }
+        else if(action === 'delete') {
+          window.localStorage.removeItem(key);
+          event.source.postMessage({
+            action: 'deleted',
+            callback: encodeURI(callback.toString()) //encode it to send
+          }, '*')
+        }
+      }
+    }
+</script>
+</body>
+</html>
